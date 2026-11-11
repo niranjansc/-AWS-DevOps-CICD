@@ -47,7 +47,7 @@ pipeline {
                         passwordVariable: 'DOCKERHUB_TOKEN'
                     )
                 ]) {
-                    bat 'echo %DOCKERHUB_TOKEN% | "%DOCKER_CLI%" login -u %DOCKERHUB_USER% --password-stdin'
+                    bat 'powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:DOCKERHUB_TOKEN | & $env:DOCKER_CLI login --username $env:DOCKERHUB_USER --password-stdin; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }"'
 
                     bat '"%DOCKER_CLI%" push %IMAGE_NAME%:%BUILD_NUMBER%'
 
