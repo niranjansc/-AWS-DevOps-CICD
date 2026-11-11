@@ -22,17 +22,21 @@ pipeline {
             }
         }
 
+       
+        
         stage('Test Application') {
             steps {
                 bat '"%DOCKER_CLI%" rm -f aws-devops-ci-test 2>NUL || exit /B 0'
 
                 bat '"%DOCKER_CLI%" run -d --name aws-devops-ci-test -p 5001:5000 %IMAGE_NAME%:%BUILD_NUMBER%'
 
-                bat 'timeout /t 5 /nobreak >NUL'
+                bat 'powershell -NoProfile -Command "Start-Sleep -Seconds 5"'
 
-                bat '''powershell -NoProfile -Command "$r = Invoke-RestMethod http://localhost:5001/health; if ($r.status -ne 'Healthy') { exit 1 }"'''
+                 bat '''powershell -NoProfile -Command "$r = Invoke-RestMethod http://localhost:5001/health; if ($r.status -ne 'Healthy') { exit 1 }"'''
             }
         }
+
+
 
         stage('Push to Docker Hub') {
             steps {
