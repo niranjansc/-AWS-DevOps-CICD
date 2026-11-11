@@ -4,6 +4,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'scniranjan/aws-devops-cicd'
+        DOCKER_CLI = 'C:\\Users\\niran\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
     }
 
     stages {
@@ -17,15 +18,15 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE_NAME%:%BUILD_NUMBER% -t %IMAGE_NAME%:latest -f docker/Dockerfile .'
+                bat '"%DOCKER_CLI%" build -t %IMAGE_NAME%:%BUILD_NUMBER% -t %IMAGE_NAME%:latest -f docker/Dockerfile .'
             }
         }
 
         stage('Test Application') {
             steps {
-                bat 'docker rm -f aws-devops-ci-test 2>NUL || exit /B 0'
+                bat '"%DOCKER_CLI%" rm -f aws-devops-ci-test 2>NUL || exit /B 0'
 
-                bat 'docker run -d --name aws-devops-ci-test -p 5001:5000 %IMAGE_NAME%:%BUILD_NUMBER%'
+                bat '"%DOCKER_CLI%" run -d --name aws-devops-ci-test -p 5001:5000 %IMAGE_NAME%:%BUILD_NUMBER%'
 
                 bat 'timeout /t 5 /nobreak >NUL'
 
@@ -42,13 +43,13 @@ pipeline {
                         passwordVariable: 'DOCKERHUB_TOKEN'
                     )
                 ]) {
-                    bat 'echo %DOCKERHUB_TOKEN% | docker login -u %DOCKERHUB_USER% --password-stdin'
+                    bat 'echo %DOCKERHUB_TOKEN% | "%DOCKER_CLI%" login -u %DOCKERHUB_USER% --password-stdin'
 
-                    bat 'docker push %IMAGE_NAME%:%BUILD_NUMBER%'
+                    bat '"%DOCKER_CLI%" push %IMAGE_NAME%:%BUILD_NUMBER%'
 
-                    bat 'docker push %IMAGE_NAME%:latest'
+                    bat '"%DOCKER_CLI%" push %IMAGE_NAME%:latest'
 
-                    bat 'docker logout'
+                    bat '"%DOCKER_CLI%" logout'
                 }
             }
         }
@@ -56,7 +57,7 @@ pipeline {
 
     post {
         always {
-            bat 'docker rm -f aws-devops-ci-test 2>NUL || exit /B 0'
+            bat '"%DOCKER_CLI%" rm -f aws-devops-ci-test 2>NUL || exit /B 0'
         }
 
         success {
