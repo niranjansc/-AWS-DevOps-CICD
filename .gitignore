@@ -1,0 +1,9 @@
+venv/
+app/venv/
+__pycache__/
+*.pyc
+.env
+*.pem
+.aws/
+.idea/
+.vscode/
